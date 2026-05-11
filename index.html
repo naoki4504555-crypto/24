@@ -13,7 +13,7 @@ try{
 </script>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ハート＆ダガー</title>
 <style>
 :root{--blue:#39a8ff;--red:#e04248;--gold:#f0c35a;}
@@ -26,7 +26,9 @@ body{margin:0;flex: 0 0 auto;
 .title-main{font-size:clamp(30px,5vw,58px);font-weight:900;color:#ffe9a8;text-shadow:0 0 12px #000,0 0 24px rgba(240,195,90,.35)}
 .ribbon{display:inline-block;margin-top:4px;padding:5px 26px 7px;background:linear-gradient(#e7bb5b,#b9852e);color:#2a1008;border:3px solid #2a1008;border-radius:999px;font-weight:900}
 .start-screen{text-align:center;padding:70px 16px}
-button{border:0;cursor:pointer;touch-action:manipulation}
+button{border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html,body{touch-action:manipulation;overscroll-behavior:none}
+.controls,.controls *,.mini-card,.mini-card *{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 button:disabled{opacity:.4;cursor:not-allowed}
 .big-btn{font-size:28px;font-weight:900;padding:18px 42px;border-radius:20px;border:4px solid #fff3b4;background:linear-gradient(#ffe98d,#d79520);color:#241006;box-shadow:0 0 30px rgba(255,210,90,.45)}
 .top-panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1900,6 +1902,23 @@ body.sokkoo-special-shake {
 </main>
 </div>
 
+<div id="rulesModal" class="rules-modal hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="rules-panel">
+    <button class="rules-close" type="button" aria-label="遊び方を閉じる" onclick="buttonTap(); closeRules()">×</button>
+    <h2 id="rulesTitle">遊び方</h2>
+    <h3>基本ルール</h3>
+    <p>あなたと相手が同時にカードを1枚ずつ出します。短剣・盾・心臓の読み合いでポイントを取り合います。</p>
+    <h3>ポイント</h3>
+    <p>短剣が心臓を刺した時だけ、短剣を出した側が1ポイント獲得します。短剣と盾、心臓と盾、同じカード同士ではポイントは入りません。</p>
+    <h3>勝敗</h3>
+    <p>全カードを使い切った時にポイントが多い側の勝ちです。途中で勝敗が確定した場合は、その時点で決着します。</p>
+    <h3>ハート＆ダガーコール</h3>
+    <p>引き分けが確定したと思ったら「ハート＆ダガーコール！」を使えます。正しければ勝ち、間違っていれば負けです。</p>
+    <h3>ソッコーモード</h3>
+    <p>ソッコーダガーが心臓系を刺すと速攻勝利、ソッコーハートが短剣系に刺されると速攻敗北になります。</p>
+  </div>
+</div>
+
 <script>
 let player, enemy, pScore, eScore;
 let gameOver = false;
@@ -2779,12 +2798,23 @@ window.addEventListener("focus", () => {
 
 
 function openRules(){
-  document.getElementById("rulesModal").classList.remove("hidden");
+  const modal = document.getElementById("rulesModal");
+  if(!modal) return;
+  modal.classList.remove("hidden");
 }
 
 function closeRules(){
-  document.getElementById("rulesModal").classList.add("hidden");
+  const modal = document.getElementById("rulesModal");
+  if(!modal) return;
+  modal.classList.add("hidden");
 }
+
+// iPhone/Safari対策：カードボタン連打時のダブルタップ拡大・縮小をゲームUI全体で無効化する。
+document.addEventListener("dblclick", (ev) => {
+  if(ev.target && ev.target.closest && ev.target.closest("button, .controls, .mini-card")){
+    ev.preventDefault();
+  }
+}, { passive:false });
 
 
 
