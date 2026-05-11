@@ -19,7 +19,7 @@ try{
 :root{--blue:#39a8ff;--red:#e04248;--gold:#f0c35a;}
 *{box-sizing:border-box}
 html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
-body{margin:0;flex: 0 0 auto;
+body{margin:0;
   min-height:100vh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#fff;background:linear-gradient(135deg,#07111f,#170909 55%,#050505);overflow-x:hidden}
 .wrap{max-width:1180px;margin:0 auto;padding:16px}
 .title{text-align:center;margin:10px 0 12px}
@@ -39,8 +39,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 
 .battle{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;margin:16px 0 10px;align-items:center}
-.side{flex: 0 0 auto;
-  min-height:390px;border-radius:24px;padding:16px;position:relative;background:rgba(255,255,255,.035);border:2px solid rgba(255,255,255,.08)}
+.side{min-height:390px;border-radius:24px;padding:16px;position:relative;background:rgba(255,255,255,.035);border:2px solid rgba(255,255,255,.08)}
 .side.player{box-shadow:inset 0 0 40px rgba(57,168,255,.12)}
 .side.enemy{box-shadow:inset 0 0 40px rgba(224,66,72,.12)}
 .nameplate{position:absolute;top:-15px;left:50%;transform:translateX(-50%);padding:6px 54px;border-radius:6px;font-size:26px;font-weight:900;white-space:nowrap}
@@ -52,14 +51,12 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .player .card-label{background:linear-gradient(#1674d6,#083d89)}
 .enemy .card-label{background:linear-gradient(#d94545,#8e1616)}
 .vs{font-size:58px;font-weight:1000;color:#fff2bd;text-shadow:0 0 12px #ffad30,0 0 32px #ffad30;text-align:center}
-.result-box{flex: 0 0 auto;
-  width:var(--hd-game-row-w);max-width:100%;min-height:72px;margin:8px auto 14px;display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:16px;background:rgba(0,0,0,.45);border:2px solid rgba(240,195,90,.65);color:#ffe784;font-size:24px;font-weight:900;text-align:center}
+.result-box{width:var(--hd-game-row-w);max-width:100%;min-height:72px;margin:8px auto 14px;display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:16px;background:rgba(0,0,0,.45);border:2px solid rgba(240,195,90,.65);color:#ffe784;font-size:24px;font-weight:900;text-align:center}
 .score{width:var(--hd-game-row-w);max-width:100%;margin:0 auto 14px;padding:10px;border-radius:16px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.18);text-align:center;font-size:28px;font-weight:900}
 .score .p{color:#48a8ff;font-size:44px}.score .e{color:#ff5656;font-size:44px}
 /* removed fixed controls rule */
 
-.card-btn,.call-btn{flex: 0 0 auto;
-  min-height:142px;border-radius:16px;background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.25);color:#fff;padding:8px;box-shadow:0 10px 18px rgba(0,0,0,.3)}
+.card-btn,.call-btn{min-height:142px;border-radius:16px;background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.25);color:#fff;padding:8px;box-shadow:0 10px 18px rgba(0,0,0,.3)}
 .card-btn img{height:94px;aspect-ratio:63/89;object-fit:cover;border-radius:8px;display:block;margin:0 auto 5px}
 .card-btn span{display:block;font-size:23px;font-weight:900}
 .card-btn.dagger{border-color:#39a8ff}.card-btn.shield{border-color:#68cf55}.card-btn.heart{border-color:#ff6d83}
@@ -72,8 +69,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 @keyframes enterRight{0%{transform:translateX(80px) rotate(8deg) scale(.7);opacity:0}70%{transform:translateX(-8px) rotate(-2deg) scale(1.04);opacity:1}100%{transform:translateX(0) rotate(0) scale(1)}}
 @keyframes winFlash{0%{box-shadow:0 16px 26px rgba(0,0,0,.55)}45%{transform:scale(1.08);box-shadow:0 0 36px gold}100%{box-shadow:0 16px 26px rgba(0,0,0,.55)}}
 to{box-shadow:0 0 34px gold;transform:scale(1.035)}}
-@media(max-width:760px){.top-panels{grid-template-columns:1fr}.battle{grid-template-columns:1fr;gap:8px}.vs{font-size:42px}.side{flex: 0 0 auto;
-  min-height:300px}.card-img{width:min(72%,210px)}
+@media(max-width:760px){.top-panels{grid-template-columns:1fr}.battle{grid-template-columns:1fr;gap:8px}.vs{font-size:42px}.side{min-height:300px}.card-img{width:min(72%,210px)}
 /* removed fixed controls rule */
 }
 
@@ -479,7 +475,6 @@ body {
 .controls .card-btn.card-empty{
   opacity: .32 !important;
   filter: grayscale(1) brightness(.65) !important;
-  transform: scale(.96);
 }
 
 .sokkoo-win-flash {
@@ -820,7 +815,6 @@ body.game-over-view .controls .card-btn.card-empty:disabled,
 .controls .card-btn.card-empty:disabled{
   opacity: 0.38 !important;
   filter: grayscale(0.65) brightness(0.72) !important;
-  transform: scale(0.96) !important;
 }
 
 body.game-over-view .controls .card-btn.card-empty img,
@@ -1381,6 +1375,52 @@ body.sokkoo-special-shake {
 }
 
 
+
+
+/* ===== HDG iOS stable tap/render rule =====
+   自分側カード選択時に、タップ中のボタンを直接拡縮・再合成しない。
+   残りカードUIは opacity/filter で状態表示し、transform はカード画像/数字の位置調整だけに限定する。 */
+html,
+body{
+  width:100%;
+  min-width:0;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+button{
+  -webkit-appearance:none;
+  appearance:none;
+}
+#controls.controls,
+.controls{
+  contain: layout paint;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+#controls .card-btn,
+.controls .card-btn,
+#controls .call-btn,
+.controls .call-btn{
+  transform:none !important;
+  -webkit-transform:none !important;
+  transition:none !important;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#controls .card-btn:active,
+.controls .card-btn:active,
+#controls .card-btn:focus,
+.controls .card-btn:focus,
+#controls .call-btn:active,
+.controls .call-btn:active,
+#controls .call-btn:focus,
+.controls .call-btn:focus{
+  transform:none !important;
+  -webkit-transform:none !important;
+  outline:none !important;
+}
 /* ===== HDG remaining-card UI system =====
    残りカード表示の根本ルール。
    相手側ミニカードと自分側ボタンは、同じ data-card と同じCSS変数で描画する。
@@ -1627,7 +1667,6 @@ body.sokkoo-special-shake {
 .controls .card-btn.card-empty{
   opacity: .38 !important;
   filter: grayscale(.65) brightness(.72) !important;
-  transform: scale(.96) !important;
 }
 
 .card-empty img,
@@ -1873,22 +1912,22 @@ body.sokkoo-special-shake {
     </div>
 
 <section id="controls" class="controls normal-layout">
-      <button id="btnSokkooDagger" data-card="ソッコーダガー" class="card-btn dagger-card sokkoo-dagger-card hidden" onclick="buttonTap(); play('ソッコーダガー')">
+      <button id="btnSokkooDagger" type="button" data-card="ソッコーダガー" class="card-btn dagger-card sokkoo-dagger-card hidden">
         <img src="sokkoo_dagger.jpeg"><span><b id="cSD">1</b></span>
       </button>
-      <button id="btnDagger" data-card="短剣" class="card-btn dagger-card" onclick="buttonTap(); play('短剣')">
+      <button id="btnDagger" type="button" data-card="短剣" class="card-btn dagger-card">
         <img src="dagger.jpeg"><span><b id="cDagger">5</b></span>
       </button>
-      <button id="btnShield" data-card="盾" class="card-btn shield-card" onclick="buttonTap(); play('盾')">
+      <button id="btnShield" type="button" data-card="盾" class="card-btn shield-card">
         <img src="shield.jpeg"><span><b id="cShield">5</b></span>
       </button>
-      <button id="btnHeart" data-card="心臓" class="card-btn heart-card" onclick="buttonTap(); play('心臓')">
+      <button id="btnHeart" type="button" data-card="心臓" class="card-btn heart-card">
         <img src="heart.jpeg"><span><b id="cHeart">5</b></span>
       </button>
-      <button id="btnSokkooHeart" data-card="ソッコーハート" class="card-btn heart-card sokkoo-heart-card hidden" onclick="buttonTap(); play('ソッコーハート')">
+      <button id="btnSokkooHeart" type="button" data-card="ソッコーハート" class="card-btn heart-card sokkoo-heart-card hidden">
         <img src="sokkoo_heart.jpeg"><span><b id="cSH">1</b></span>
       </button>
-      <button id="callBtn" class="call-btn" onclick="buttonTap(); playerCall()">
+      <button id="callBtn" type="button" class="call-btn" data-action="call">
         ハート＆ダガー<br>コール！
       </button>
     </section>
@@ -2313,9 +2352,13 @@ function showCards(pCard, eCard){
   document.getElementById("playerName").innerText = cardLabel(pCard);
   document.getElementById("enemyName").innerText = cardLabel(eCard);
 
-  void pImg.offsetWidth;
+  const playerPanel = document.querySelector(".panel.player");
+  const playerPanelVisible = playerPanel && getComputedStyle(playerPanel).display !== "none";
+  if(playerPanelVisible){
+    void pImg.offsetWidth;
+    pImg.classList.add("card-enter-player");
+  }
   void eImg.offsetWidth;
-  pImg.classList.add("card-enter-player");
   eImg.classList.add("card-enter-enemy");
   playSound("card");
   vibrate("card");
@@ -2796,6 +2839,63 @@ window.addEventListener("focus", () => {
 });
 
 
+
+
+let hdgBattleInputLock = false;
+
+function setupStableBattleControls(){
+  const controls = document.getElementById("controls");
+  if(!controls || controls.dataset.stableTapReady === "1") return;
+  controls.dataset.stableTapReady = "1";
+
+  const finishTouch = () => {
+    const active = document.activeElement;
+    if(active && typeof active.blur === "function") active.blur();
+  };
+
+  controls.addEventListener("pointerdown", (ev) => {
+    const btn = ev.target.closest("button");
+    if(!btn || !controls.contains(btn)) return;
+    ev.preventDefault();
+    finishTouch();
+  }, { passive:false });
+
+  controls.addEventListener("pointerup", (ev) => {
+    const btn = ev.target.closest("button");
+    if(!btn || !controls.contains(btn)) return;
+    ev.preventDefault();
+    if(btn.disabled || hdgBattleInputLock) { finishTouch(); return; }
+    hdgBattleInputLock = true;
+
+    const card = btn.dataset.card;
+    const action = btn.dataset.action;
+    requestAnimationFrame(() => {
+      buttonTap();
+      if(card){
+        play(card);
+      }else if(action === "call"){
+        playerCall();
+      }
+      finishTouch();
+      setTimeout(() => { hdgBattleInputLock = false; }, 120);
+    });
+  }, { passive:false });
+
+  controls.addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button");
+    if(!btn || !controls.contains(btn)) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+  }, true);
+
+  controls.addEventListener("touchend", () => finishTouch(), { passive:true });
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", setupStableBattleControls);
+}else{
+  setupStableBattleControls();
+}
 
 function openRules(){
   const modal = document.getElementById("rulesModal");
