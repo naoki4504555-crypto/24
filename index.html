@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script>
+/* Free Battle standalone page: reload stays on this page and BGM is controlled locally. */
+/* HDG iframe class for Safari bottom UI */
+try{
+  if(window.parent && window.parent !== window){
+    document.documentElement.classList.add("hdg-iframe-mode");
+  }
+}catch(e){}
+
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ハート＆ダガー</title>
+<style>
+:root{--blue:#39a8ff;--red:#e04248;--gold:#f0c35a;}
+*{box-sizing:border-box}
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+body{margin:0;flex: 0 0 auto;
+  min-height:100vh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:#fff;background:linear-gradient(135deg,#07111f,#170909 55%,#050505);overflow-x:hidden}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.title{text-align:center;margin:10px 0 12px}
+.title-main{font-size:clamp(30px,5vw,58px);font-weight:900;color:#ffe9a8;text-shadow:0 0 12px #000,0 0 24px rgba(240,195,90,.35)}
+.ribbon{display:inline-block;margin-top:4px;padding:5px 26px 7px;background:linear-gradient(#e7bb5b,#b9852e);color:#2a1008;border:3px solid #2a1008;border-radius:999px;font-weight:900}
+.start-screen{text-align:center;padding:70px 16px}
+button{border:0;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.4;cursor:not-allowed}
+.big-btn{font-size:28px;font-weight:900;padding:18px 42px;border-radius:20px;border:4px solid #fff3b4;background:linear-gradient(#ffe98d,#d79520);color:#241006;box-shadow:0 0 30px rgba(255,210,90,.45)}
+.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel{border-radius:18px;padding:10px 14px;box-shadow:0 0 0 2px rgba(255,255,255,.08) inset,0 10px 28px rgba(0,0,0,.35)}
+.panel.player{background:linear-gradient(135deg,rgba(18,65,112,.85),rgba(5,19,41,.88));border:2px solid rgba(57,168,255,.85)}
+.panel.enemy{background:linear-gradient(135deg,rgba(123,28,28,.84),rgba(37,9,9,.9));border:2px solid rgba(224,66,72,.9)}
+.panel h3{margin:0 0 8px;font-size:19px;text-align:center}
+
+
+.battle{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;margin:16px 0 10px;align-items:center}
+.side{flex: 0 0 auto;
+  min-height:390px;border-radius:24px;padding:16px;position:relative;background:rgba(255,255,255,.035);border:2px solid rgba(255,255,255,.08)}
+.side.player{box-shadow:inset 0 0 40px rgba(57,168,255,.12)}
+.side.enemy{box-shadow:inset 0 0 40px rgba(224,66,72,.12)}
+.nameplate{position:absolute;top:-15px;left:50%;transform:translateX(-50%);padding:6px 54px;border-radius:6px;font-size:26px;font-weight:900;white-space:nowrap}
+.player .nameplate{background:linear-gradient(#1c6bd2,#083b83);border:3px solid #45b8ff}
+.enemy .nameplate{background:linear-gradient(#d94444,#7d1414);border:3px solid #ff6161}
+.card-stage{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding-top:20px}
+.card-img{width:min(88%,270px);aspect-ratio:63/89;object-fit:cover;border-radius:14px;box-shadow:0 16px 26px rgba(0,0,0,.55);background:#fff}
+.card-label{min-width:180px;padding:10px 22px;border-radius:6px;font-size:26px;font-weight:900;text-align:center}
+.player .card-label{background:linear-gradient(#1674d6,#083d89)}
+.enemy .card-label{background:linear-gradient(#d94545,#8e1616)}
+.vs{font-size:58px;font-weight:1000;color:#fff2bd;text-shadow:0 0 12px #ffad30,0 0 32px #ffad30;text-align:center}
+.result-box{flex: 0 0 auto;
+  width:var(--hd-game-row-w);max-width:100%;min-height:72px;margin:8px auto 14px;display:flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:16px;background:rgba(0,0,0,.45);border:2px solid rgba(240,195,90,.65);color:#ffe784;font-size:24px;font-weight:900;text-align:center}
+.score{width:var(--hd-game-row-w);max-width:100%;margin:0 auto 14px;padding:10px;border-radius:16px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.18);text-align:center;font-size:28px;font-weight:900}
+.score .p{color:#48a8ff;font-size:44px}.score .e{color:#ff5656;font-size:44px}
+/* removed fixed controls rule */
+
+.card-btn,.call-btn{flex: 0 0 auto;
+  min-height:142px;border-radius:16px;background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.25);color:#fff;padding:8px;box-shadow:0 10px 18px rgba(0,0,0,.3)}
+.card-btn img{height:94px;aspect-ratio:63/89;object-fit:cover;border-radius:8px;display:block;margin:0 auto 5px}
+.card-btn span{display:block;font-size:23px;font-weight:900}
+.card-btn.dagger{border-color:#39a8ff}.card-btn.shield{border-color:#68cf55}.card-btn.heart{border-color:#ff6d83}
+.call-btn{background:linear-gradient(135deg,#ffe990,#b56f0d);color:#2a1007;font-size:24px;font-weight:1000;border-color:#fff0a8}
+.call-hidden{animation:callPulse .55s infinite alternate}
+.log{width:var(--hd-game-row-w);max-width:100%;height:140px;overflow-y:auto;margin:14px auto 0;padding:12px 16px;border-radius:14px;background:rgba(0,0,0,.55);border:1px solid rgba(240,195,90,.5);font-weight:800;line-height:1.55}
+.hidden{display:none}
+.card-enter-player{animation:enterLeft .36s ease-out}.card-enter-enemy{animation:enterRight .36s ease-out}.card-win{animation:winFlash .65s ease-out;border:5px solid gold}.card-lose{filter:brightness(.65);transform:scale(.97)}
+@keyframes enterLeft{0%{transform:translateX(-80px) rotate(-8deg) scale(.7);opacity:0}70%{transform:translateX(8px) rotate(2deg) scale(1.04);opacity:1}100%{transform:translateX(0) rotate(0) scale(1)}}
+@keyframes enterRight{0%{transform:translateX(80px) rotate(8deg) scale(.7);opacity:0}70%{transform:translateX(-8px) rotate(-2deg) scale(1.04);opacity:1}100%{transform:translateX(0) rotate(0) scale(1)}}
+@keyframes winFlash{0%{box-shadow:0 16px 26px rgba(0,0,0,.55)}45%{transform:scale(1.08);box-shadow:0 0 36px gold}100%{box-shadow:0 16px 26px rgba(0,0,0,.55)}}
+to{box-shadow:0 0 34px gold;transform:scale(1.035)}}
+@media(max-width:760px){.top-panels{grid-template-columns:1fr}.battle{grid-template-columns:1fr;gap:8px}.vs{font-size:42px}.side{flex: 0 0 auto;
+  min-height:300px}.card-img{width:min(72%,210px)}
+/* removed fixed controls rule */
+}
+
+/* ===== スマホ最適化版 ===== */
+body {
+  padding-bottom: calc(238px + env(safe-area-inset-bottom));
+}
+
+.wrap {
+  padding: 10px 10px 0;
+}
+
+.title {
+  margin: 4px 0 8px;
+}
+
+.title-main {
+  font-size: clamp(28px, 8vw, 42px);
+}
+
+.ribbon {
+  font-size: 13px;
+  padding: 3px 18px 5px;
+}
+
+.top-panels {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.panel {
+  padding: 8px 6px;
+  border-radius: 14px;
+}
+
+.panel h3 {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+
+.battle {
+  grid-template-columns: 1fr auto 1fr;
+  gap: 6px;
+  margin: 18px 0 8px;
+}
+
+.side {
+  flex: 0 0 auto;
+  min-height: 228px;
+  padding: 8px;
+  border-radius: 18px;
+}
+
+.nameplate {
+  top: -13px;
+  padding: 4px 22px;
+  font-size: 17px;
+  border-radius:6px;
+}
+
+.card-stage {
+  padding-top: 12px;
+  gap: 7px;
+}
+
+.card-img {
+  width: min(94%, 126px);
+  border-radius: 9px;
+}
+
+.card-label {
+  min-width: 96px;
+  padding: 6px 10px;
+  font-size: 18px;
+  border-radius: 9px;
+}
+
+.vs {
+  font-size: 30px;
+}
+
+.result-box {
+  flex: 0 0 auto;
+  min-height: 54px;
+  margin: 6px auto 8px;
+  padding: 8px 12px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+
+.score {
+  margin-bottom: 8px;
+  padding: 6px;
+  font-size: 18px;
+  border-radius: 14px;
+}
+
+.score .p,
+.score .e {
+  font-size: 31px;
+}
+/* removed fixed controls rule */
+
+
+.card-btn,
+.call-btn {
+  flex: 0 0 auto;
+  min-height: 92px;
+  border-radius: 14px;
+  padding: 5px;
+}
+
+.card-btn img {
+  height: 58px;
+  margin-bottom: 2px;
+}
+
+.card-btn span {
+  font-size: 17px;
+}
+
+.call-btn {
+  grid-column: 1 / 4;
+  flex: 0 0 auto;
+  min-height: 62px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.log {
+  height: 86px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  border-radius:6px;
+}
+
+.big-btn {
+  font-size: 24px;
+  padding: 15px 34px;
+}
+
+.start-screen {
+  padding: 44px 12px;
+}
+
+/* 小さめスマホ用 */
+@media (max-width: 390px) {
+  body {
+    padding-bottom: calc(226px + env(safe-area-inset-bottom));
+  }
+
+  
+
+  .side {
+    flex: 0 0 auto;
+  min-height: 210px;
+  }
+
+  .card-img {
+    width: min(94%, 116px);
+  }
+
+  .card-label {
+    font-size: 16px;
+  }
+
+  .result-box {
+    font-size: 16px;
+  }
+
+  .card-btn,
+  .call-btn {
+    flex: 0 0 auto;
+  min-height: 86px;
+  }
+
+  .card-btn img {
+    height: 52px;
+  }
+
+  .call-btn {
+    flex: 0 0 auto;
+  min-height: 58px;
+    font-size: 20px;
+  }
+}
+
+/* 横幅が広い端末・PCでは従来寄りに戻す */
+@media (min-width: 860px) and (min-height: 621px) {
+  body {
+    padding-bottom: 20px;
+  }
+
+  .wrap {
+    padding: 16px;
+  }
+
+  .top-panels {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 10px 14px;
+  }
+
+  .panel h3 {
+    font-size: 19px;
+  }
+
+  
+
+  
+
+  
+
+  
+
+  .battle {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 18px;
+  }
+
+  .side {
+    flex: 0 0 auto;
+  min-height: 390px;
+    padding: 16px;
+  }
+
+  .nameplate {
+    top: -15px;
+    padding: 6px 54px;
+    font-size: 26px;
+  }
+
+  .card-img {
+    width: min(88%, 270px);
+  }
+
+  .card-label {
+    min-width: 180px;
+    padding: 10px 22px;
+    font-size: 26px;
+  }
+
+  .vs {
+    font-size: 58px;
+  }
+
+  .result-box {
+    flex: 0 0 auto;
+  min-height: 72px;
+    font-size: 24px;
+  }
+
+  .score {
+    font-size: 28px;
+  }
+
+  .score .p,
+  .score .e {
+    font-size: 44px;
+  }
+/* removed fixed controls rule */
+
+
+  .card-btn,
+  .call-btn {
+    flex: 0 0 auto;
+  min-height: 142px;
+    padding: 8px;
+  }
+
+  .card-btn img {
+    height: 94px;
+    margin-bottom: 5px;
+  }
+
+  .card-btn span {
+    font-size: 23px;
+  }
+
+  .call-btn {
+    grid-column: auto;
+    flex: 0 0 auto;
+  min-height: 142px;
+    font-size: 24px;
+  }
+
+  .log {
+    height: 140px;
+    font-size: initial;
+  }
+}
+
+.mode-box{width:var(--hd-game-row-w);max-width:100%;margin:8px auto 10px;padding:10px;border-radius:16px;background:rgba(0,0,0,.42);border:2px solid rgba(240,195,90,.55);text-align:center}
+.mode-title{font-weight:900;color:#ffe784;margin-bottom:8px}
+.mode-btn{font-size:16px;font-weight:900;padding:10px 14px;border-radius:14px;background:linear-gradient(#fff,#d8d8d8);color:#241006;border:3px solid rgba(255,255,255,.65)}
+.mode-btn.active{background:linear-gradient(#ffe98d,#d79520);border-color:#fff0a8;box-shadow:0 0 20px rgba(255,210,90,.45)}
+.sokkoo-mini{border-color:#ffe784!important;box-shadow:0 0 12px rgba(255,210,90,.25)}
+.card-btn span{line-height:1.08}
+@media(max-width:760px){
+  .mode-box{margin:6px auto 8px;padding:8px}
+  .mode-title{font-size:13px;margin-bottom:6px}
+  .mode-btn{font-size:13px;padding:8px 9px}
+}
+@media (min-width: 860px) and (min-height: 621px){
+  .controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(0,0,0,0.9);
+  z-index: 1000;
+}
+}
+/* removed fixed controls rule */
+
+
+/* 通常モード：短剣・盾・心臓の3つを横一列、その下に横長コール */
+.controls.normal-layout {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+/* ソッコーモード：5つを均一横一列、その下に横長コール */
+.controls.sokkoo-layout {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+.controls .card-btn,
+.controls .call-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 78px !important;
+  height: auto !important;
+  padding: 4px !important;
+  border-radius:6px !important;
+}
+
+.controls .card-btn img {
+  height: 46px !important;
+  max-width: 100% !important;
+  margin: 0 auto 2px !important;
+}
+
+.controls .card-btn span {
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  white-space: normal !important;
+}
+
+.controls .call-btn {
+  grid-column: 1 / -1 !important;
+  min-height: var(--hd-call-min-h, 58px) !important;
+  font-size: var(--hd-call-font-size, 20px) !important;
+  line-height: 1.15 !important;
+}
+
+.controls.normal-layout #btnSokkooDagger,
+.controls.normal-layout #btnSokkooHeart {
+  display: none !important;
+}
+
+@media (min-width: 860px) and (min-height: 621px) {
+  body {
+    padding-bottom: 20px !important;
+  }
+  .controls {
+    position: static !important;
+    background: transparent !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 12px 0 !important;
+  }
+  .controls .card-btn,
+  .controls .call-btn {
+    min-height: 128px !important;
+    padding: 8px !important;
+  }
+  .controls .card-btn img {
+    height: 84px !important;
+  }
+  .controls .card-btn span {
+    font-size: 18px !important;
+  }
+  .controls .call-btn {
+    min-height: var(--hd-call-min-h, 80px) !important;
+    font-size: var(--hd-call-font-size, 24px) !important;
+  }
+}
+
+/* ===== 0枚表示・速攻演出 ===== */
+.card-empty,
+.controls .card-btn.card-empty{
+  opacity: .32 !important;
+  filter: grayscale(1) brightness(.65) !important;
+  transform: scale(.96);
+}
+
+.sokkoo-win-flash {
+  animation: sokkooWinFlash .9s ease-out 1;
+}
+
+.sokkoo-lose-flash {
+  animation: sokkooLoseFlash .9s ease-out 1;
+}
+
+@keyframes sokkooWinFlash {
+  0% { box-shadow: inset 0 0 0 rgba(255,220,80,0), 0 0 0 rgba(255,220,80,0); background-color: transparent; }
+  18% { box-shadow: inset 0 0 80px rgba(255,230,70,.95), 0 0 50px rgba(255,230,70,.95); background-color: rgba(255,230,70,.22); }
+  40% { box-shadow: inset 0 0 110px rgba(255,255,255,.95), 0 0 70px rgba(255,230,70,.95); background-color: rgba(255,255,255,.25); }
+  100% { box-shadow: inset 0 0 0 rgba(255,220,80,0), 0 0 0 rgba(255,220,80,0); background-color: transparent; }
+}
+
+@keyframes sokkooLoseFlash {
+  0% { box-shadow: inset 0 0 0 rgba(255,0,0,0), 0 0 0 rgba(255,0,0,0); background-color: transparent; }
+  18% { box-shadow: inset 0 0 90px rgba(255,0,0,.9), 0 0 55px rgba(255,0,0,.9); background-color: rgba(255,0,0,.22); }
+  40% { box-shadow: inset 0 0 120px rgba(70,0,0,.9), 0 0 70px rgba(255,0,0,.95); background-color: rgba(80,0,0,.32); }
+  100% { box-shadow: inset 0 0 0 rgba(255,0,0,0), 0 0 0 rgba(255,0,0,0); background-color: transparent; }
+}
+
+.result-box.sokkoo-win-text {
+  color: #fff2a8 !important;
+  border-color: gold !important;
+  box-shadow: 0 0 34px rgba(255,220,60,.7) !important;
+  text-shadow: 0 0 14px rgba(255,220,60,.9);
+}
+
+.result-box.sokkoo-lose-text {
+  color: #ffb0b0 !important;
+  border-color: #ff3a3a !important;
+  box-shadow: 0 0 34px rgba(255,0,0,.6) !important;
+  text-shadow: 0 0 14px rgba(255,0,0,.9);
+}
+
+.sokkoo-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+}
+.sokkoo-overlay.win {
+  animation: overlayWin 1.1s ease-out 1;
+}
+.sokkoo-overlay.lose {
+  animation: overlayLose 1.1s ease-out 1;
+}
+@keyframes overlayWin {
+  0% { opacity: 0; background: transparent; }
+  12% { opacity: 1; background: radial-gradient(circle, rgba(255,255,255,.95), rgba(255,220,0,.82), rgba(255,130,0,.25)); }
+  38% { opacity: .85; background: radial-gradient(circle, rgba(255,255,180,.9), rgba(255,210,0,.55), transparent); }
+  100% { opacity: 0; background: transparent; }
+}
+@keyframes overlayLose {
+  0% { opacity: 0; background: transparent; }
+  12% { opacity: 1; background: radial-gradient(circle, rgba(255,255,255,.75), rgba(255,0,0,.8), rgba(0,0,0,.45)); }
+  42% { opacity: .85; background: radial-gradient(circle, rgba(255,0,0,.65), rgba(80,0,0,.7), transparent); }
+  100% { opacity: 0; background: transparent; }
+}
+
+/* ===== さらに鋭利なカード角丸・自分/相手共通 ===== */
+.controls .card-btn{
+  border-radius: 3px !important;
+}
+
+.controls .card-btn img,
+.card-img{
+  border-radius: 3px !important;
+}
+
+/* ===== モード選択ボタン画像化 ===== */
+.mode-box {
+  width: var(--hd-game-row-w) !important;
+  max-width: 100% !important;
+}
+
+.mode-card-btn {
+  width: min(42vw, 220px);
+  padding: 6px !important;
+  vertical-align: top;
+  overflow: hidden;
+  border-radius: 8px !important;
+}
+
+.mode-card-btn img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.mode-card-btn span {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.mode-btn.active.mode-card-btn {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(255,210,90,.65) !important;
+}
+
+@media (max-width: 430px) {
+  .mode-box {
+    padding: 7px !important;
+  }
+  .mode-card-btn {
+    width: 43vw;
+    padding: 4px !important;
+  }
+  .mode-card-btn span {
+    font-size: 12px;
+  }
+}
+
+/* 場のカード微調整 */
+.play-area .card img,
+.card-img{
+  border: 2px solid #fff !important;
+  border-radius: 10px !important;
+}
+
+
+/* ===== 遊び方モーダル ===== */
+.howto-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px auto 10px;
+}
+
+.howto-btn {
+  padding: 9px 28px;
+  border-radius: 999px;
+  border: 3px solid #fff0a8;
+  background: linear-gradient(#fff8ce, #d6a94a);
+  color: #241006;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 0 16px rgba(255,210,90,.28);
+}
+
+.rules-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.rules-modal.hidden {
+  display: none !important;
+}
+
+.rules-panel {
+  position: relative;
+  width: min(94vw, 720px);
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 22px 20px 26px;
+  border-radius: 16px;
+  background: #fff9df;
+  color: #241006;
+  border: 4px solid #d6a94a;
+  box-shadow: 0 18px 50px rgba(0,0,0,.6);
+  text-align: left;
+  line-height: 1.65;
+}
+
+.rules-panel h2 {
+  margin: 0 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 3px solid #d6a94a;
+  font-size: 25px;
+  color: #1b0905;
+}
+
+.rules-panel h3 {
+  margin: 18px 0 5px;
+  font-size: 19px;
+  color: #33120b;
+}
+
+.rules-panel p {
+  margin: 6px 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.rules-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  width: 42px;
+  height: 42px;
+  margin: -10px -8px 8px 8px;
+  border-radius: 50%;
+  border: 3px solid #2b0d08;
+  background: #2b0d08;
+  color: #fff9df;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+@media (max-width: 430px) {
+  .howto-btn {
+    font-size: 16px;
+    padding: 8px 24px;
+  }
+  .rules-panel {
+    padding: 18px 16px 24px;
+    max-height: 84vh;
+  }
+  .rules-panel h2 {
+    font-size: 22px;
+  }
+  .rules-panel h3 {
+    font-size: 17px;
+  }
+  .rules-panel p {
+    font-size: 14px;
+  }
+}
+
+
+
+/* ===== スコア欄内ターン表示 ===== */
+.score #turnText {
+  color: #ffe784;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+@media (max-width: 430px) {
+  .score #turnText {
+    display: inline-block;
+    font-size: 17px;
+    margin-right: 2px;
+  }
+}
+
+
+/* ===== スコアの横棒調整 ===== */
+.score .score-dash {
+  display: inline-block;
+  position: relative;
+  top: -2px;
+  margin: 0 2px;
+  color: #ffe784;
+  font-weight: 900;
+}
+
+@media (max-width: 430px) {
+  .score .score-dash {
+    top: -1px;
+  }
+}
+
+
+/* ===== スコア欄の高さ・色・整列を再調整 ===== */
+.score {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  line-height: 1 !important;
+}
+
+.score #turnText,
+.score .score-dash {
+  color: #fff !important;
+  line-height: 1 !important;
+  position: static !important;
+  top: auto !important;
+}
+
+.score .p,
+.score .e {
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.score span {
+  line-height: 1 !important;
+}
+
+
+/* ===== 勝敗確定後の残りカード確認用：暗くしない ===== */
+body.game-over-view .controls .card-btn,
+body.game-over-view .controls .card-btn:disabled{
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+body.game-over-view .controls .card-btn img{
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+
+/* ===== 勝敗確定後：0枚カードは半透明のまま、それ以外は明るく ===== */
+body.game-over-view .controls .card-btn:disabled:not(.card-empty){
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* 0枚はそのまま半透明 */
+body.game-over-view .card-empty {
+  opacity: .4 !important;
+}
+
+
+/* ===== 0枚カードは必ず半透明 ===== */
+.card-empty {
+  opacity: 0.4 !important;
+  filter: grayscale(0.3) !important;
+}
+
+
+body.game-over-view .controls .card-btn.card-empty,
+body.game-over-view .controls .card-btn.card-empty:disabled,
+.controls .card-btn.card-empty,
+.controls .card-btn.card-empty:disabled{
+  opacity: 0.38 !important;
+  filter: grayscale(0.65) brightness(0.72) !important;
+  transform: scale(0.96) !important;
+}
+
+body.game-over-view .controls .card-btn.card-empty img,
+.controls .card-btn.card-empty img{
+  opacity: 0.75 !important;
+  filter: grayscale(0.65) brightness(0.72) !important;
+}
+
+
+/* ===== FINAL FIX: 0枚カードは絶対に暗くする（最優先） ===== */
+body.game-over-view .controls .card-btn.card-empty,
+body.game-over-view .controls .card-btn.card-empty:disabled,
+.controls .card-btn.card-empty{
+  opacity: 0.4 !important;
+  filter: grayscale(0.6) brightness(0.7) !important;
+}
+
+/* 画像も強制 */
+body.game-over-view .card-empty img,
+.card-empty img {
+  opacity: 0.7 !important;
+  filter: grayscale(0.6) brightness(0.7) !important;
+}
+
+
+/* スマホ表示は元のまま一切変更しない */
+@media (min-width: 768px) {
+  /* 相手の残りカード：赤/黄/青の外枠だけ広げる */
+  
+
+  
+
+  
+
+  /* 自分の残りカードボタン：外枠だけ横幅を広げる */
+  .controls.normal-layout {
+    display: grid !important;
+    grid-template-columns: repeat(3, 260px) !important;
+    justify-content: center !important;
+    gap: 14px !important;
+  }
+
+  .controls.sokkoo-layout {
+    display: grid !important;
+    grid-template-columns: repeat(5, 180px) !important;
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+
+  .controls .card-btn {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 118px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 中のカード画像は触らない。元サイズを維持 */
+  .controls .card-btn img{
+    width: auto !important;
+    height: 70px !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .controls .card-btn span{
+    text-align: center !important;
+  }
+}
+
+
+/* ===== 残りカードアイコン最終調整 ===== */
+
+/* スマホ版：ソッコーモードの相手側だけ高さを自分側ボタンに揃える */
+
+
+/* PC/タブレット版：自分側・相手側どちらも幅広の外枠に統一 */
+@media (min-width: 768px) {
+  :root {
+    --wide-card-frame-normal: 300px;
+    --wide-card-frame-sokkoo: 190px;
+    --wide-card-frame-height: 132px;
+    --wide-card-image-height: 76px;
+  }
+
+  /* 相手側 通常モード */
+  
+
+  /* 自分側 通常モード */
+  .controls.normal-layout {
+    display: grid !important;
+    grid-template-columns: repeat(3, var(--wide-card-frame-normal)) !important;
+    justify-content: center !important;
+    gap: 14px !important;
+  }
+
+  /* 相手側 ソッコーモード */
+  
+
+  /* 自分側 ソッコーモード */
+  .controls.sokkoo-layout {
+    display: grid !important;
+    grid-template-columns: repeat(5, var(--wide-card-frame-sokkoo)) !important;
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+
+  /* 外枠だけ幅広にする。中の画像は大きくしすぎない */
+  .controls .card-btn{
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: var(--wide-card-frame-height) !important;
+    min-height: var(--wide-card-frame-height) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .controls .card-btn img{
+    width: auto !important;
+    height: var(--wide-card-image-height) !important;
+    max-width: 72px !important;
+    object-fit: contain !important;
+    margin: 0 auto 4px !important;
+  }
+
+  .controls .card-btn span{
+    width: 100% !important;
+    text-align: center !important;
+    line-height: 1.05 !important;
+    font-size: 18px !important;
+  }
+
+  .controls .card-btn b{
+    font-size: 18px !important;
+  }
+
+  /* 画面幅が少し狭いiPad縦向け */
+  @media (max-width: 980px) {
+    :root {
+      --wide-card-frame-normal: 240px;
+      --wide-card-frame-sokkoo: 150px;
+      --wide-card-frame-height: 122px;
+      --wide-card-image-height: 68px;
+    }
+  }
+}
+
+
+/* 4系統共通：外枠だけ調整 */
+  .controls.normal-layout .card-btn,
+.controls.sokkoo-layout .card-btn{
+    min-height: 0 !important;
+    height: auto !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* 中の小さいカード画像はサイズ変更しない。中央配置だけ保証 */
+  .controls.normal-layout .card-btn img,
+.controls.sokkoo-layout .card-btn img{
+    margin-top: 0 !important;
+    margin-bottom: 2px !important;
+    align-self: center !important;
+  }
+
+  /* テキストの余白を詰めて、外枠だけ低く見せる */
+  .controls.normal-layout .card-btn span,
+.controls.sokkoo-layout .card-btn span{
+    line-height: 1.0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+
+/* ===== スマホ最終：4つの残りカード外枠を写真の高さ感に統一 ===== */
+
+
+/* ===== 最終補助：JS適用前の見た目用 ===== */
+
+
+/* ===== スマホ：残りカードアイコン最終調整 ===== */
+@media (max-width: 767px) {
+
+  /* 残りカードアイコンの中画像サイズを統一 */
+  .controls .card-btn img {
+    height: 48px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    margin: 0 auto 2px !important;
+  }
+
+  /* 赤・黄・青の外枠だけ低くして統一 */
+  .controls .card-btn {
+    min-height: 0 !important;
+    height: 88px !important;
+    min-height: 88px !important;
+    max-height: 88px !important;
+
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .controls .card-btn span,
+  .controls .card-btn b {
+    margin: 0 !important;
+    line-height: 1.0 !important;
+  }
+}
+
+
+/* ===== FINAL FIX: min-height解除＋サイズ統一 ===== */
+@media (max-width: 767px) {
+
+  .card-btn{
+    min-height: unset !important;
+  }
+
+  .card-btn{
+    height: 88px !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-btn img{
+    height: 48px !important;
+    width: auto !important;
+  }
+
+}
+
+
+/* ===== スマホ専用・最終強制：残りカードアイコンだけ88px ===== */
+@media (max-width: 767px) {
+  body .controls .card-btn{
+    min-height: 0px !important;
+    height: 88px !important;
+    max-height: 88px !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  body .controls .card-btn img{
+    height: 48px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    margin: 0 auto 2px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body .controls .card-btn{
+    min-height: 0px !important;
+    height: 88px !important;
+    max-height: 88px !important;
+    padding: 4px 6px !important;
+  }
+
+  body .controls .card-btn img{
+    height: 48px !important;
+    width: auto !important;
+  }
+}
+
+
+/* ===== スクロール安定版：スマホ残りカードアイコン ===== */
+@media (max-width: 767px) {
+  .controls {
+    align-items: stretch !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  .controls .card-btn:not(.hidden){
+    min-height: 0 !important;
+    height: 88px !important;
+    max-height: 88px !important;
+    padding: 4px 6px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+  }
+
+  .controls .card-btn.hidden{
+    display: none !important;
+  }
+
+  .controls .card-btn img{
+    height: 48px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    margin: 0 auto 2px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .controls .card-btn span,
+.controls .card-btn b{
+    line-height: 1 !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+
+/* ===== タブレット/PC：残りカードアイコン高さ統一 ===== */
+@media (min-width: 768px) {
+  .controls.normal-layout .card-btn,
+.controls.sokkoo-layout .card-btn{
+    min-height: 132px !important;
+    height: 132px !important;
+    max-height: 132px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* 中のカード画像は高さだけ統一。横幅は自動 */
+  .controls.normal-layout .card-btn img,
+.controls.sokkoo-layout .card-btn img{
+    height: 78px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    margin: 0 auto 5px !important;
+  }
+
+  .controls.normal-layout .card-btn span,
+.controls.sokkoo-layout .card-btn span,
+.controls.normal-layout .card-btn b,
+.controls.sokkoo-layout .card-btn b{
+    line-height: 1.05 !important;
+    margin: 0 !important;
+  }
+}
+
+
+/* ===== BGM ON/OFFボタン：遊び方ボタンと同一設計 ===== */
+.bgm-toggle-btn {
+  min-width: 128px;
+}
+
+.bgm-toggle-btn.bgm-on {
+  background: linear-gradient(#dff6ff, #55aee8);
+  border-color: #bcecff;
+}
+
+
+/* ===== VS大カード WIN/LOSE表示 ===== */
+.card-stage {
+  position: relative !important;
+}
+
+.battle-result-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(.78);
+  z-index: 20;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: clamp(24px, 4vw, 44px);
+  font-weight: 1000;
+  letter-spacing: 2px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s ease, transform .18s ease;
+  border: 3px solid rgba(255,255,255,.9);
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+}
+
+.battle-result-label.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.battle-result-label.win {
+  color: #ffe66d;
+  text-shadow: 0 0 10px rgba(255,215,0,.95), 0 3px 0 rgba(0,0,0,.45);
+  box-shadow: 0 0 24px rgba(255,215,0,.6);
+}
+
+.battle-result-label.lose {
+  color: #9ed8ff;
+  text-shadow: 0 0 10px rgba(70,170,255,.9), 0 3px 0 rgba(0,0,0,.45);
+  box-shadow: 0 0 22px rgba(70,170,255,.5);
+}
+
+
+/* ===== ソッコー勝利/敗北 専用演出 ===== */
+.sokkoo-finish-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3000;
+  opacity: 0;
+}
+
+.sokkoo-finish-overlay.show.win {
+  animation: sokkooFinishWinFlash .9s ease-out 1;
+}
+
+.sokkoo-finish-overlay.show.lose {
+  animation: sokkooFinishLoseFlash .9s ease-out 1;
+}
+
+@keyframes sokkooFinishWinFlash {
+  0% { opacity: 0; background: transparent; }
+  12% { opacity: 1; background: radial-gradient(circle, rgba(255,255,255,.95), rgba(255,220,0,.85), rgba(255,120,0,.20), transparent 72%); }
+  42% { opacity: .85; background: radial-gradient(circle, rgba(255,255,180,.95), rgba(255,215,0,.58), transparent 70%); }
+  100% { opacity: 0; background: transparent; }
+}
+
+@keyframes sokkooFinishLoseFlash {
+  0% { opacity: 0; background: transparent; }
+  12% { opacity: 1; background: radial-gradient(circle, rgba(255,255,255,.75), rgba(80,150,255,.82), rgba(20,20,80,.35), transparent 72%); }
+  42% { opacity: .85; background: radial-gradient(circle, rgba(120,190,255,.75), rgba(10,20,80,.58), transparent 70%); }
+  100% { opacity: 0; background: transparent; }
+}
+
+body.sokkoo-special-shake {
+  animation: sokkooSpecialShake .42s ease-in-out 1;
+}
+
+@keyframes sokkooSpecialShake {
+  0% { transform: translateX(0); }
+  18% { transform: translateX(-5px); }
+  35% { transform: translateX(5px); }
+  52% { transform: translateX(-3px); }
+  70% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+.battle-result-label.sokkoo-special {
+  font-size: clamp(34px, 7vw, 78px) !important;
+  padding: 10px 18px !important;
+  border-width: 4px !important;
+  animation: sokkooResultPop .6s cubic-bezier(.18,1.35,.32,1) 1;
+}
+
+.battle-result-label.sokkoo-special.win {
+  background: rgba(64, 42, 0, .72) !important;
+  box-shadow: 0 0 34px rgba(255,220,0,.9), inset 0 0 18px rgba(255,255,255,.35) !important;
+}
+
+.battle-result-label.sokkoo-special.lose {
+  background: rgba(0, 18, 58, .72) !important;
+  box-shadow: 0 0 34px rgba(80,170,255,.85), inset 0 0 18px rgba(255,255,255,.24) !important;
+}
+
+@keyframes sokkooResultPop {
+  0% { transform: translate(-50%, -50%) scale(.25) rotate(-8deg); opacity: 0; }
+  55% { transform: translate(-50%, -50%) scale(1.22) rotate(3deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+}
+
+
+/* HDG fix: smartphone Sokkoo effect must not shake bottom remaining-card UI */
+@media (max-width: 767px){
+  body.sokkoo-special-shake{
+    animation:none !important;
+    transform:none !important;
+  }
+  .controls{
+    transform:none !important;
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+  .controls .card-btn,
+  .controls .card-btn img,
+  .controls .card-btn span{
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+  .battle.sokkoo-special-shake-local{
+    animation:sokkooSpecialShake .42s ease-in-out 1;
+    transform-origin:center center;
+  }
+}
+
+
+/* HDG freebattle cool English heading */
+.freebattle-sign{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  margin:8px 0 14px;
+}
+.freebattle-sign .title-main{
+  display:inline-block;
+  padding:8px 28px 9px;
+  border:3px solid rgba(255,236,160,.95);
+  border-radius:999px;
+  background:linear-gradient(135deg,rgba(0,0,0,.72),rgba(55,20,12,.72));
+  color:#ffe9a8;
+  font-size:clamp(30px,5vw,58px);
+  font-weight:1000;
+  letter-spacing:.10em;
+  text-shadow:0 2px 0 #000,0 0 18px rgba(255,210,90,.65);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.16) inset,
+    0 0 24px rgba(255,196,70,.26),
+    0 10px 26px rgba(0,0,0,.46);
+}
+.freebattle-sign .title-sub{
+  margin-top:6px;
+  padding:4px 22px 5px;
+  border-radius:999px;
+  background:linear-gradient(#e7bb5b,#b9852e);
+  color:#2a1008;
+  border:2px solid #2a1008;
+  font-weight:1000;
+  font-size:clamp(12px,2.5vw,18px);
+  letter-spacing:.16em;
+  box-shadow:0 4px 0 rgba(0,0,0,.36);
+}
+
+
+/* ===== HDG remaining-card UI system =====
+   残りカード表示の根本ルール。
+   相手側ミニカードと自分側ボタンは、同じ data-card と同じCSS変数で描画する。
+   スマホ横画面では「一番上のゲームモード欄」と同じ横幅を1つの基準にして、
+   残りカード行・VSエリア・操作ボタンもその幅いっぱいに均等配分する。 */
+:root{
+  --remain-card-h: 86px;
+  --remain-card-radius: 16px;
+  --remain-card-pad: 4px;
+  --remain-card-img-h: 48px;
+  --remain-image-radius: 4px;
+  --remain-count-size: 15px;
+  --remain-count-y: 4px;
+  --remain-label-size: 11px;
+  --remain-gap: 6px;
+  --hd-call-font-size: 20px;
+  --hd-call-min-h: 58px;
+  --hd-screen-gutter: 10px;
+  --hd-vs-row-w: 100%;
+  --hd-game-row-w: var(--hd-vs-row-w);
+  --remain-row-w: var(--hd-game-row-w);
+  --remain-dagger-color: #e34242;
+  --remain-shield-color: #f0c94a;
+  --remain-heart-color: #3b9cff;
+}
+
+.hidden,
+#controls .card-btn.hidden,
+.panel.enemy .mini-card.hidden{
+  display: none !important;
+}
+
+.restart-area{
+  width: var(--hd-game-row-w) !important;
+  max-width: 100% !important;
+  margin: 10px auto calc(112px + env(safe-area-inset-bottom)) !important;
+  text-align: center !important;
+}
+
+.restart-area .restart-btn{
+  width: 100% !important;
+  max-width: none !important;
+  font-size: 20px !important;
+  padding: 12px 28px !important;
+}
+
+.panel.player{
+  display: none !important;
+}
+
+.panel.enemy{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.top-panels{
+  grid-template-columns: 1fr !important;
+}
+
+/* ゲーム画面の共通横幅レール。
+   VSカードエリア（.battle）の横幅を基準にして、主要UIを同じ幅で統一する。 */
+.battle,
+.mode-box,
+.result-box,
+.score,
+.log,
+.restart-area{
+  width: var(--hd-game-row-w) !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* 残りカード行の共通コンテナ。
+   ここで相手側・自分側の横幅基準を統一する。 */
+.counts,
+.panel.enemy .counts,
+#controls.controls,
+.controls{
+  width: var(--remain-row-w) !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+  gap: var(--remain-gap) !important;
+}
+
+.counts,
+.panel.enemy .counts{
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+}
+
+.panel.enemy.sokkoo-enemy .counts{
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+#controls.controls,
+.controls{
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  align-content: center !important;
+  overflow: visible !important;
+}
+
+/* 自分側のカードボタンは、通常3枚・ソッコー5枚を同じ行幅いっぱいに均等配分する。 */
+#controls.controls.normal-layout .card-btn:not(.hidden),
+.controls.normal-layout .card-btn:not(.hidden){
+  flex: 1 1 calc((100% - (var(--remain-gap) * 2)) / 3) !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+#controls.controls.sokkoo-layout .card-btn:not(.hidden),
+.controls.sokkoo-layout .card-btn:not(.hidden){
+  flex: 1 1 calc((100% - (var(--remain-gap) * 4)) / 5) !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+#controls .call-btn,
+.controls .call-btn,
+#controls.sokkoo-layout .call-btn,
+.controls.sokkoo-layout .call-btn{
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: var(--hd-call-min-h) !important;
+  font-size: var(--hd-call-font-size) !important;
+  line-height: 1.15 !important;
+}
+
+#controls .card-btn,
+.controls .card-btn,
+.mini-card,
+.panel.enemy .mini-card{
+  min-width: 0 !important;
+  height: var(--remain-card-h) !important;
+  min-height: var(--remain-card-h) !important;
+  max-height: var(--remain-card-h) !important;
+  padding: var(--remain-card-pad) !important;
+  box-sizing: border-box !important;
+  border-radius: var(--remain-card-radius) !important;
+  background: rgba(255,255,255,.08) !important;
+  border: 3px solid rgba(255,255,255,.25) !important;
+  box-shadow: 0 10px 18px rgba(0,0,0,.3) !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+#controls .card-btn img,
+.controls .card-btn img,
+.mini-card img,
+.panel.enemy .mini-card img{
+  height: var(--remain-card-img-h) !important;
+  width: auto !important;
+  max-width: 100% !important;
+  aspect-ratio: 63 / 89 !important;
+  object-fit: contain !important;
+  /* 画像データは加工せず、カード画像の白フチ外周だけが自然に丸く見える最小半径にする。 */
+  border-radius: var(--remain-image-radius) !important;
+  clip-path: none !important;
+  display: block !important;
+  margin: 0 auto !important;
+  transform: translateY(6px) !important;
+  flex: 0 0 auto !important;
+  background: transparent !important;
+}
+
+#controls .card-btn span,
+.controls .card-btn span,
+.mini-card span,
+.panel.enemy .mini-card span{
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: var(--remain-label-size) !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  transform: translateY(var(--remain-count-y)) !important;
+}
+
+.card-btn span b,
+#controls .card-btn b,
+.controls .card-btn b,
+.mini-card b,
+.panel.enemy .mini-card b,
+.panel.enemy .mini-card span b{
+  display: inline-block !important;
+  margin: 0 0 0 2px !important;
+  color: #ffe784 !important;
+  font-size: var(--remain-count-size) !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  white-space: nowrap !important;
+}
+
+#controls .card-btn[data-card="短剣"],
+.controls .card-btn[data-card="短剣"],
+.panel.enemy .mini-card[data-card="短剣"],
+#controls .card-btn[data-card="ソッコーダガー"],
+.controls .card-btn[data-card="ソッコーダガー"],
+.panel.enemy .mini-card[data-card="ソッコーダガー"]{
+  border-color: var(--remain-dagger-color) !important;
+  box-shadow: 0 0 12px rgba(227,66,66,.24) !important;
+}
+
+#controls .card-btn[data-card="盾"],
+.controls .card-btn[data-card="盾"],
+.panel.enemy .mini-card[data-card="盾"]{
+  border-color: var(--remain-shield-color) !important;
+  box-shadow: 0 0 12px rgba(240,201,74,.24) !important;
+}
+
+#controls .card-btn[data-card="心臓"],
+.controls .card-btn[data-card="心臓"],
+.panel.enemy .mini-card[data-card="心臓"],
+#controls .card-btn[data-card="ソッコーハート"],
+.controls .card-btn[data-card="ソッコーハート"],
+.panel.enemy .mini-card[data-card="ソッコーハート"]{
+  border-color: var(--remain-heart-color) !important;
+  box-shadow: 0 0 12px rgba(59,156,255,.24) !important;
+}
+
+.card-empty,
+#controls .card-btn.card-empty,
+.controls .card-btn.card-empty{
+  opacity: .38 !important;
+  filter: grayscale(.65) brightness(.72) !important;
+  transform: scale(.96) !important;
+}
+
+.card-empty img,
+#controls .card-btn.card-empty img,
+.controls .card-btn.card-empty img{
+  opacity: .75 !important;
+  filter: grayscale(.65) brightness(.72) !important;
+}
+
+@media (min-width: 860px) and (min-height: 621px){
+  :root{
+    --remain-card-h: 142px;
+    --remain-card-pad: 8px;
+    --remain-card-radius: 16px;
+    --remain-card-img-h: 82px;
+    --remain-count-size: 18px;
+    --remain-count-y: 4px;
+    --remain-label-size: 22px;
+    --remain-image-radius: 6px;
+    --remain-gap: 12px;
+    --hd-call-font-size: 24px;
+    --hd-call-min-h: 80px;
+    --hd-screen-gutter: 16px;
+    --hd-vs-row-w: 100%;
+    --hd-game-row-w: var(--hd-vs-row-w);
+    --remain-row-w: var(--hd-game-row-w);
+  }
+
+  #controls.controls.normal-layout .card-btn:not(.hidden),
+  .controls.normal-layout .card-btn:not(.hidden),
+  #controls.controls.sokkoo-layout .card-btn:not(.hidden),
+  .controls.sokkoo-layout .card-btn:not(.hidden){
+    max-width: none !important;
+  }
+
+  #controls .call-btn,
+  .controls .call-btn,
+  #controls.sokkoo-layout .call-btn,
+  .controls.sokkoo-layout .call-btn{
+    flex-basis: 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: var(--hd-call-min-h) !important;
+    font-size: var(--hd-call-font-size) !important;
+  }
+
+  #btnSokkooDagger span br,
+  #btnSokkooHeart span br,
+  #eSokkooDaggerBox span br,
+  #eSokkooHeartBox span br{
+    display: none !important;
+  }
+
+  #btnSokkooDagger span,
+  #btnSokkooHeart span,
+  #eSokkooDaggerBox span,
+  #eSokkooHeartBox span{
+    white-space: nowrap !important;
+  }
+}
+
+/* スマホ横画面：縦画面と同じサイズ感のまま、共通横幅レールだけを画面端まで伸ばす。
+   横向き専用の拡大はここで廃止し、サイズは残りカードUIの基本変数を使う。 */
+@media (orientation: landscape) and (max-height: 620px){
+  :root{
+    --hd-screen-gutter: 16px;
+    --hd-landscape-vs-row-w: var(--hd-game-row-w);
+    --remain-row-w: var(--hd-game-row-w);
+    --remain-card-h: 88px;
+    --remain-card-img-h: 48px;
+    --remain-image-radius: 4px;
+    --remain-card-radius: 16px;
+    --remain-count-size: 15px;
+    --remain-count-y: 4px;
+    --remain-label-size: 11px;
+    --remain-gap: 6px;
+    --hd-call-font-size: 20px;
+    --hd-call-min-h: 58px;
+    --hd-battle-side-h: 248px;
+    --hd-battle-card-img-w: 126px;
+    --hd-battle-card-label-size: 18px;
+    --hd-battle-card-label-min-w: 96px;
+  }
+
+  .battle{
+    width: var(--hd-landscape-vs-row-w) !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    align-items: center !important;
+  }
+
+  .side{
+    min-width: 0 !important;
+    min-height: var(--hd-battle-side-h) !important;
+    height: var(--hd-battle-side-h) !important;
+    padding: 8px !important;
+  }
+
+  .card-stage{
+    width: 100% !important;
+    height: 100% !important;
+    padding-top: 12px !important;
+    gap: 7px !important;
+  }
+
+  .nameplate{
+    top: -13px !important;
+    padding: 4px 22px !important;
+    font-size: 17px !important;
+  }
+
+  .card-img{
+    width: min(94%, var(--hd-battle-card-img-w)) !important;
+    max-width: var(--hd-battle-card-img-w) !important;
+  }
+
+  .card-label{
+    min-width: var(--hd-battle-card-label-min-w) !important;
+    padding: 6px 10px !important;
+    font-size: var(--hd-battle-card-label-size) !important;
+  }
+
+  .vs{
+    font-size: 30px !important;
+  }
+
+  .counts,
+  .panel.enemy .counts{
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .panel.enemy.sokkoo-enemy .counts{
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  #controls.controls,
+  .controls{
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    overflow: visible !important;
+  }
+
+  #controls.controls.normal-layout .card-btn:not(.hidden),
+  .controls.normal-layout .card-btn:not(.hidden){
+    flex: 1 1 calc((100% - (var(--remain-gap) * 2)) / 3) !important;
+    max-width: none !important;
+  }
+
+  #controls.controls.sokkoo-layout .card-btn:not(.hidden),
+  .controls.sokkoo-layout .card-btn:not(.hidden){
+    flex: 1 1 calc((100% - (var(--remain-gap) * 4)) / 5) !important;
+    max-width: none !important;
+  }
+
+  #controls .call-btn,
+  .controls .call-btn{
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: var(--hd-call-min-h) !important;
+    font-size: var(--hd-call-font-size) !important;
+  }
+}
+
+
+</style>
+</head>
+<body>
+<div id="sokkooFinishOverlay" class="sokkoo-finish-overlay"></div>
+<div class="wrap">
+  <div class="title"><div class="title-main">ハート＆ダガー</div></div>
+
+  <div class="mode-box">
+    <div class="mode-title">ゲームモード</div>
+    <button id="normalModeBtn" class="mode-btn mode-card-btn active" onclick="buttonTap(); setMode(false)">
+      <img src="mode_normal.jpeg" alt="通常モード">
+      <span>通常モード</span>
+    </button>
+    <button id="sokkooModeBtn" class="mode-btn mode-card-btn" onclick="buttonTap(); setMode(true)">
+      <img src="mode_sokkoo.jpeg" alt="ソッコーモード">
+      <span>ソッコーモード</span>
+    </button>
+  </div>
+
+  <div class="howto-area">
+    <button class="howto-btn" type="button" onclick="buttonTap(); openRules()">遊び方</button>
+    <button id="bgmToggleBtn" class="howto-btn bgm-toggle-btn" type="button" onclick="buttonTap(); toggleBgm()" aria-pressed="false">BGM OFF</button>
+  </div>
+
+  <div id="startScreen" class="start-screen">
+    <button class="big-btn" onclick="buttonTap(); startGame()">ゲーム開始</button>
+  </div>
+
+  <main id="gameArea" class="hidden">
+    <section class="top-panels">
+      <div class="panel enemy">
+        <h3>相手の残りカード</h3>
+        <div class="counts">
+          <div id="eSokkooDaggerBox" data-card="ソッコーダガー" class="mini-card dagger-card sokkoo-dagger-card sokkoo-mini hidden"><img src="sokkoo_dagger.jpeg"><span><b id="eSokkooDagger">1</b></span></div>
+          <div data-card="短剣" class="mini-card dagger-card"><img src="dagger.jpeg"><span><b id="eDagger">5</b></span></div>
+          <div data-card="盾" class="mini-card shield-card"><img src="shield.jpeg"><span><b id="eShield">5</b></span></div>
+          <div data-card="心臓" class="mini-card heart-card"><img src="heart.jpeg"><span><b id="eHeart">5</b></span></div>
+          <div id="eSokkooHeartBox" data-card="ソッコーハート" class="mini-card heart-card sokkoo-heart-card sokkoo-mini hidden"><img src="sokkoo_heart.jpeg"><span><b id="eSokkooHeart">1</b></span></div>
+        
+        
+        </div>
+      </div>
+    </section>
+
+    <section class="battle">
+      <div class="side player">
+        <div class="nameplate">あなた</div>
+        <div class="card-stage">
+          <img id="playerImg" class="card-img" src="card_back.jpeg" alt="あなたのカード">
+          <div id="playerResultLabel" class="battle-result-label"></div>
+          <div id="playerName" class="card-label">未選択</div>
+        </div>
+      </div>
+
+      <div class="vs">VS</div>
+
+      <div class="side enemy">
+        <div class="nameplate">相手</div>
+        <div class="card-stage">
+          <img id="enemyImg" class="card-img" src="card_back.jpeg" alt="相手のカード">
+          <div id="enemyResultLabel" class="battle-result-label"></div>
+          <div id="enemyName" class="card-label">未選択</div>
+        </div>
+      </div>
+    </section>
+
+    <div id="resultText" class="result-box">カードを選んでください</div>
+
+    <div class="score">
+      <span id="turnText">0ターン目</span>
+      <span>　あなた　</span>
+      <span id="pScore" class="p">0</span>
+      <span class="score-dash">-</span>
+      <span id="eScore" class="e">0</span>
+      <span>　相手</span>
+    </div>
+
+<section id="controls" class="controls normal-layout">
+      <button id="btnSokkooDagger" data-card="ソッコーダガー" class="card-btn dagger-card sokkoo-dagger-card hidden" onclick="buttonTap(); play('ソッコーダガー')">
+        <img src="sokkoo_dagger.jpeg"><span><b id="cSD">1</b></span>
+      </button>
+      <button id="btnDagger" data-card="短剣" class="card-btn dagger-card" onclick="buttonTap(); play('短剣')">
+        <img src="dagger.jpeg"><span><b id="cDagger">5</b></span>
+      </button>
+      <button id="btnShield" data-card="盾" class="card-btn shield-card" onclick="buttonTap(); play('盾')">
+        <img src="shield.jpeg"><span><b id="cShield">5</b></span>
+      </button>
+      <button id="btnHeart" data-card="心臓" class="card-btn heart-card" onclick="buttonTap(); play('心臓')">
+        <img src="heart.jpeg"><span><b id="cHeart">5</b></span>
+      </button>
+      <button id="btnSokkooHeart" data-card="ソッコーハート" class="card-btn heart-card sokkoo-heart-card hidden" onclick="buttonTap(); play('ソッコーハート')">
+        <img src="sokkoo_heart.jpeg"><span><b id="cSH">1</b></span>
+      </button>
+      <button id="callBtn" class="call-btn" onclick="buttonTap(); playerCall()">
+        ハート＆ダガー<br>コール！
+      </button>
+    </section>
+
+<div id="log" class="log"></div>
+
+<div class="restart-area">
+      <button class="big-btn restart-btn" onclick="buttonTap(); startGame()">もう一度はじめる</button>
+    </div>
+
+</main>
+</div>
+
+<script>
+let player, enemy, pScore, eScore;
+let gameOver = false;
+let callAvailable = false;
+let enemyCallTimer = null;
+let audioCtx = null;
+let audioUnlocked = false;
+let turnNumber = 0;
+let sokkooMode = false;
+const AI_CALL_DELAY = 1500;
+
+const CARD_IMAGES = {
+  "短剣": "dagger.jpeg",
+  "盾": "shield.jpeg",
+  "心臓": "heart.jpeg",
+  "ソッコーダガー": "sokkoo_dagger.jpeg",
+  "ソッコーハート": "sokkoo_heart.jpeg",
+  "裏": "card_back.jpeg"
+};
+
+const REMAINING_CARD_CLASS_MAP = {
+  "短剣": ["dagger-card"],
+  "盾": ["shield-card"],
+  "心臓": ["heart-card"],
+  "ソッコーダガー": ["dagger-card", "sokkoo-dagger-card", "sokkoo-mini"],
+  "ソッコーハート": ["heart-card", "sokkoo-heart-card", "sokkoo-mini"]
+};
+
+function syncRemainingCardKindClass(el, card){
+  if(!el || !card) return;
+  el.classList.remove(
+    "dagger", "shield", "heart",
+    "dagger-card", "shield-card", "heart-card",
+    "sokkoo-dagger-card", "sokkoo-heart-card", "sokkoo-mini"
+  );
+  const classes = REMAINING_CARD_CLASS_MAP[card] || [];
+  classes.forEach(cls => el.classList.add(cls));
+}
+
+function setMode(isSokkoo){
+  sokkooMode = isSokkoo;
+  document.getElementById("normalModeBtn").classList.toggle("active", !sokkooMode);
+  document.getElementById("sokkooModeBtn").classList.toggle("active", sokkooMode);
+  if(!document.getElementById("gameArea").classList.contains("hidden")) startGame();
+}
+
+function makeHand(){
+  let hand;
+  if(sokkooMode){
+    hand = {短剣:4, 盾:5, 心臓:4, ソッコーダガー:1, ソッコーハート:1};
+  } else {
+    hand = {短剣:5, 盾:5, 心臓:5};
+  }
+  return hand;
+}
+
+function cardLabel(card){
+  return card;
+}
+
+
+
+
+let hdLastPicoAt = 0;
+
+function unlockAudio(){
+  try{
+    const ctx = getAudioContext();
+    if(ctx.state === "suspended"){
+      const p = ctx.resume();
+      if(p && p.catch) p.catch(()=>{});
+    }
+    audioUnlocked = true;
+return ctx;
+  } catch(e){
+    audioCtx = null;
+    return null;
+  }
+}
+
+
+function ensureBattleBgm(forceUnlock){
+  if(forceUnlock) unlockAudio();
+  if(bgmEnabled) startBgm();
+}
+
+function buttonTap(){
+  const nowMs = Date.now();
+  if(nowMs - hdLastPicoAt < 130) return;
+  hdLastPicoAt = nowMs;
+const ctx = unlockAudio();
+  if(!ctx) return;
+
+  const fire = () => {
+    try{
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(980, now);
+      osc.frequency.exponentialRampToValueAtTime(1460, now + 0.05);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.26, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    }catch(e){}
+  };
+
+  if(ctx.state === "suspended"){
+    const p = ctx.resume();
+    if(p && p.then) p.then(fire).catch(()=>{});
+  }else{
+    fire();
+  }
+}
+
+
+
+/* HDG one-time silent audio unlock */
+let hdAudioUnlockedOnce = false;
+
+function unlockAudioOnce(){
+  if(hdAudioUnlockedOnce) return;
+  hdAudioUnlockedOnce = true;
+
+  try{
+    const ctx = unlockAudio();
+    if(!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    gain.gain.setValueAtTime(0.000001, now);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.001);
+  }catch(e){}
+}
+
+window.addEventListener("pointerdown", unlockAudioOnce, { once:true, passive:true });
+
+function clearBattleResultLabels(){
+  const p = document.getElementById("playerResultLabel");
+  const e = document.getElementById("enemyResultLabel");
+  if(!p || !e) return;
+  p.textContent = "";
+  e.textContent = "";
+  p.className = "battle-result-label";
+  e.className = "battle-result-label";
+}
+
+function showBattleResultLabels(kind){
+  const p = document.getElementById("playerResultLabel");
+  const e = document.getElementById("enemyResultLabel");
+  if(!p || !e) return;
+
+  clearBattleResultLabels();
+
+  if(kind === "win"){
+    p.textContent = "WIN";
+    e.textContent = "LOSE";
+    p.classList.add("show", "win");
+    e.classList.add("show", "lose");
+  } else if(kind === "lose"){
+    p.textContent = "LOSE";
+    e.textContent = "WIN";
+    p.classList.add("show", "lose");
+    e.classList.add("show", "win");
+  }
+}
+
+
+function clearHistoryLog(){
+  const log = document.getElementById("log");
+  if(log && log.parentNode){
+    const newLog = log.cloneNode(false);
+    newLog.id = "log";
+    log.parentNode.replaceChild(newLog, log);
+  }
+
+  const historyEl = document.getElementById("history");
+  if(historyEl && historyEl.parentNode){
+    const newHistory = historyEl.cloneNode(false);
+    newHistory.id = "history";
+    historyEl.parentNode.replaceChild(newHistory, historyEl);
+  }
+}
+
+function startGame(){
+clearHistoryLog();
+clearEnemyCallTimer();
+  player = makeHand();
+  enemy = makeHand();
+  pScore = 0;
+  eScore = 0;
+  gameOver = false;
+  callAvailable = false;
+  turnNumber = 0;
+
+  document.getElementById("startScreen").classList.add("hidden");
+  document.getElementById("gameArea").classList.remove("hidden");
+  document.getElementById("playerImg").src = CARD_IMAGES["裏"];
+  document.getElementById("enemyImg").src = CARD_IMAGES["裏"];
+  document.getElementById("playerName").innerText = "未選択";
+  document.getElementById("enemyName").innerText = "未選択";
+  document.getElementById("turnText").innerText = "0ターン目";
+  document.getElementById("resultText").innerText = "カードを選んでください";
+  document.getElementById("resultText").classList.remove("sokkoo-win-text", "sokkoo-lose-text");
+  document.body.classList.remove("sokkoo-win-flash", "sokkoo-lose-flash", "game-over-view");
+  const overlay = document.getElementById("sokkooOverlay");
+  if(overlay) overlay.classList.remove("win", "lose");
+  clearHistoryLog();
+  resetCardClasses();
+  clearBattleResultLabels();
+  updateUI();
+  playSound("start");
+}
+
+const REMAINING_CARD_ITEMS = [
+  { side: "player", card: "短剣", countId: "cDagger", boxId: "btnDagger", mode: "all" },
+  { side: "player", card: "盾", countId: "cShield", boxId: "btnShield", mode: "all" },
+  { side: "player", card: "心臓", countId: "cHeart", boxId: "btnHeart", mode: "all" },
+  { side: "player", card: "ソッコーダガー", countId: "cSD", boxId: "btnSokkooDagger", mode: "sokkoo" },
+  { side: "player", card: "ソッコーハート", countId: "cSH", boxId: "btnSokkooHeart", mode: "sokkoo" },
+  { side: "enemy", card: "短剣", countId: "eDagger", boxSelector: '.panel.enemy .mini-card[data-card="短剣"]', mode: "all" },
+  { side: "enemy", card: "盾", countId: "eShield", boxSelector: '.panel.enemy .mini-card[data-card="盾"]', mode: "all" },
+  { side: "enemy", card: "心臓", countId: "eHeart", boxSelector: '.panel.enemy .mini-card[data-card="心臓"]', mode: "all" },
+  { side: "enemy", card: "ソッコーダガー", countId: "eSokkooDagger", boxId: "eSokkooDaggerBox", mode: "sokkoo" },
+  { side: "enemy", card: "ソッコーハート", countId: "eSokkooHeart", boxId: "eSokkooHeartBox", mode: "sokkoo" }
+];
+
+function getRemainingBox(item){
+  if(item.boxId) return document.getElementById(item.boxId);
+  if(item.boxSelector) return document.querySelector(item.boxSelector);
+  return null;
+}
+
+function getRemainingHand(side){
+  return side === "player" ? player : enemy;
+}
+
+function updateRemainingCardUI(){
+  const enemyPanel = document.querySelector(".panel.enemy");
+  if(enemyPanel) enemyPanel.classList.toggle("sokkoo-enemy", sokkooMode);
+
+  const controls = document.getElementById("controls");
+  if(controls){
+    controls.classList.toggle("normal-layout", !sokkooMode);
+    controls.classList.toggle("sokkoo-layout", sokkooMode);
+  }
+
+  REMAINING_CARD_ITEMS.forEach(item => {
+    const hand = getRemainingHand(item.side);
+    const count = hand ? (hand[item.card] || 0) : 0;
+    const countEl = document.getElementById(item.countId);
+    const box = getRemainingBox(item);
+    const visible = item.mode !== "sokkoo" || sokkooMode;
+
+    if(countEl) countEl.innerText = count;
+
+    if(box){
+      if(!box.getAttribute("data-card")) box.setAttribute("data-card", item.card);
+      syncRemainingCardKindClass(box, item.card);
+      box.classList.toggle("hidden", !visible);
+      box.classList.toggle("card-empty", visible && count === 0);
+      box.removeAttribute("style");
+      if(item.side === "player"){
+        box.disabled = gameOver || !visible || count === 0;
+      }
+    }
+  });
+}
+
+function setCardEmptyState(){
+  updateRemainingCardUI();
+}
+
+function applyModeSpecificVisibility(){
+  updateRemainingCardUI();
+}
+
+function triggerSokkooEffect(kind){
+  const body = document.body;
+  const resultBox = document.getElementById("resultText");
+
+  body.classList.remove("sokkoo-win-flash", "sokkoo-lose-flash");
+  resultBox.classList.remove("sokkoo-win-text", "sokkoo-lose-text");
+
+  void body.offsetWidth;
+
+  const overlay = document.getElementById("sokkooOverlay");
+  if(overlay){
+    overlay.classList.remove("win", "lose");
+    void overlay.offsetWidth;
+  }
+
+  if(kind === "win"){
+    body.classList.add("sokkoo-win-flash");
+    resultBox.classList.add("sokkoo-win-text");
+    if(overlay) overlay.classList.add("win");
+    playSound("sokkooWin");
+    vibrate("sokkooWin");
+  } else {
+    body.classList.add("sokkoo-lose-flash");
+    resultBox.classList.add("sokkoo-lose-text");
+    if(overlay) overlay.classList.add("lose");
+    playSound("sokkooLose");
+    vibrate("sokkooLose");
+  }
+}
+
+
+function updateUI(){
+  document.body.classList.toggle("game-over-view", gameOver);
+  updateRemainingCardUI();
+
+  document.getElementById("turnText").innerText = turnNumber + "ターン目";
+  document.getElementById("pScore").innerText = pScore;
+  document.getElementById("eScore").innerText = eScore;
+
+  const callBtn = document.getElementById("callBtn");
+  callBtn.disabled = gameOver;
+  callBtn.classList.remove("call-ready", "call-hidden");
+}
+
+function randomEnemy(){
+  // 相手の残りカードを、実際の枚数ぶんだけ山札化して完全ランダムに1枚引く
+  const deck = [];
+
+  for(const card of Object.keys(enemy)){
+    const count = enemy[card] || 0;
+    for(let i = 0; i < count; i++){
+      deck.push(card);
+    }
+  }
+
+  if(deck.length === 0) return null;
+
+  // Fisher-Yatesではなく、残り山札から1枚を等確率抽選
+  const index = Math.floor(Math.random() * deck.length);
+  return deck[index];
+}
+
+function play(card){
+  if(gameOver || player[card] <= 0) return;
+
+  // 同点確定状態でカードを出そうとした場合は、相手が先にコールした扱いにする
+  if(isDrawLockedExactly()){
+    enemyCall();
+    return;
+  }
+
+  clearEnemyCallTimer();
+
+  const enemyCard = randomEnemy();
+  if(!enemyCard) return;
+
+  player[card]--;
+  enemy[enemyCard]--;
+
+  turnNumber++;
+  document.getElementById("turnText").innerText = turnNumber + "ターン目";
+
+  showCards(card, enemyCard);
+  judge(card, enemyCard);
+  updateUI();
+
+  if(gameOver) return;
+
+  if(totalCards(player) === 0){
+    endGame();
+    return;
+  }
+  if(checkEarlyEnd()) return;
+  checkHeartAndDaggerCall();
+}
+
+function showCards(pCard, eCard){
+  resetCardClasses();
+  const pImg = document.getElementById("playerImg");
+  const eImg = document.getElementById("enemyImg");
+
+  pImg.src = CARD_IMAGES[pCard];
+  eImg.src = CARD_IMAGES[eCard];
+  document.getElementById("playerName").innerText = cardLabel(pCard);
+  document.getElementById("enemyName").innerText = cardLabel(eCard);
+
+  void pImg.offsetWidth;
+  void eImg.offsetWidth;
+  pImg.classList.add("card-enter-player");
+  eImg.classList.add("card-enter-enemy");
+  playSound("card");
+  vibrate("card");
+}
+
+
+function logBattle(pCard, eCard, result){
+  log(`${turnNumber}ターン目　${pCard}　VS　${eCard}　→　${result}`);
+}
+
+
+
+function triggerSokkooShakeSafely(){
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const battle = document.querySelector(".battle");
+  if(isMobile && battle){
+    document.body.classList.remove("sokkoo-special-shake");
+    battle.classList.remove("sokkoo-special-shake-local");
+    void battle.offsetWidth;
+    battle.classList.add("sokkoo-special-shake-local");
+    setTimeout(() => battle.classList.remove("sokkoo-special-shake-local"), 500);
+    return;
+  }
+  document.body.classList.remove("sokkoo-special-shake");
+  void document.body.offsetWidth;
+  document.body.classList.add("sokkoo-special-shake");
+  setTimeout(() => document.body.classList.remove("sokkoo-special-shake"), 500);
+}
+
+function triggerSokkooFinishSpecial(kind){
+  const overlay = document.getElementById("sokkooFinishOverlay");
+  if(overlay){
+    overlay.className = "sokkoo-finish-overlay";
+    void overlay.offsetWidth;
+    overlay.className = "sokkoo-finish-overlay show " + kind;
+    setTimeout(() => {
+      overlay.className = "sokkoo-finish-overlay";
+    }, 950);
+  }
+
+  triggerSokkooShakeSafely();
+
+  const p = document.getElementById("playerResultLabel");
+  const e = document.getElementById("enemyResultLabel");
+  if(p && e){
+    p.classList.add("sokkoo-special");
+    e.classList.add("sokkoo-special");
+  }
+}
+
+function finishSokkoo(kind, pCard, eCard){
+  gameOver = true;
+  callAvailable = false;
+  clearEnemyCallTimer();
+
+  const result = kind === "win" ? "速攻勝利！" : "速攻敗北！";
+  const resultText = document.getElementById("resultText");
+
+  resultText.innerText = result;
+  resultText.classList.remove("sokkoo-win-text", "sokkoo-lose-text");
+  resultText.classList.add(kind === "win" ? "sokkoo-win-text" : "sokkoo-lose-text");
+
+  document.getElementById("playerImg").classList.toggle("card-win", kind === "win");
+  document.getElementById("playerImg").classList.toggle("card-lose", kind === "lose");
+  document.getElementById("enemyImg").classList.toggle("card-win", kind === "lose");
+  document.getElementById("enemyImg").classList.toggle("card-lose", kind === "win");
+
+  triggerSokkooEffect(kind);
+  showBattleResultLabels(kind);
+  triggerSokkooFinishSpecial(kind);
+  setCardEmptyState();
+  logBattle(pCard, eCard, result);
+  updateUI();
+}
+
+function judge(p, e){
+  let result = "ポイントなし";
+
+  // ソッコールール：専用演出つき
+  if(p === "ソッコーダガー" && (e === "心臓" || e === "ソッコーハート")){
+    finishSokkoo("win", p, e);
+    return;
+  }
+
+  if(e === "ソッコーダガー" && (p === "心臓" || p === "ソッコーハート")){
+    finishSokkoo("lose", p, e);
+    return;
+  }
+
+  if(p === "ソッコーハート" && (e === "短剣" || e === "ソッコーダガー")){
+    finishSokkoo("lose", p, e);
+    return;
+  }
+
+  if(e === "ソッコーハート" && (p === "短剣" || p === "ソッコーダガー")){
+    finishSokkoo("win", p, e);
+    return;
+  }
+
+  if(p === "短剣" && e === "心臓"){
+    pScore++;
+    result = "あなたが1ポイント獲得！";
+    document.getElementById("playerImg").classList.add("card-win");
+    document.getElementById("enemyImg").classList.add("card-lose");
+    playSound("win");
+    vibrate("point");
+  } else if(e === "短剣" && p === "心臓"){
+    eScore++;
+    result = "相手が1ポイント獲得！";
+    document.getElementById("enemyImg").classList.add("card-win");
+    document.getElementById("playerImg").classList.add("card-lose");
+    playSound("lose");
+    vibrate("point");
+  } else {
+    playSound("block");
+    vibrate("block");
+  }
+
+  document.getElementById("resultText").classList.remove("sokkoo-win-text", "sokkoo-lose-text");
+  document.getElementById("resultText").innerText = result;
+  logBattle(p, e, result);
+}
+
+function getFutureOutcomes(){
+  const memo = new Map();
+  return searchFutureOutcomes(
+    {...player},
+    {...enemy},
+    pScore - eScore,
+    memo
+  );
+}
+
+function checkEarlyEnd(){
+  const outcomes = getFutureOutcomes();
+
+  if(outcomes.size === 1 && outcomes.has("player")){
+    gameOver = true;
+    callAvailable = false;
+    clearEnemyCallTimer();
+    document.getElementById("resultText").innerText = "勝負あり！あなたの勝ち！";
+    showBattleResultLabels("win");
+    log("どんな順番で出しても最終的にあなたの勝ちです！");
+    playSound("finalWin");
+    vibrate("win");
+    updateUI();
+    return true;
+  }
+
+  if(outcomes.size === 1 && outcomes.has("enemy")){
+    gameOver = true;
+    callAvailable = false;
+    clearEnemyCallTimer();
+    document.getElementById("resultText").innerText = "勝負あり！あなたの負け！";
+    showBattleResultLabels("lose");
+    log("どんな順番で出しても最終的にあなたの負けです！");
+    playSound("finalLose");
+    vibrate("lose");
+    updateUI();
+    return true;
+  }
+
+  return false;
+}
+
+function checkHeartAndDaggerCall(){
+  if(gameOver) return;
+  callAvailable = isDrawLockedExactly();
+
+  if(callAvailable){
+    
+    
+    enemyCallTimer = setTimeout(() => {
+      if(!gameOver && isDrawLockedExactly()) enemyCall();
+    }, AI_CALL_DELAY);
+  }
+  updateUI();
+}
+
+function playerCall(){
+  if(gameOver) return;
+  clearEnemyCallTimer();
+
+  if(isDrawLockedExactly()){
+    gameOver = true;
+    callAvailable = false;
+    document.getElementById("resultText").innerText = "ハート＆ダガーコール！あなたの勝ち！";
+    showBattleResultLabels("win");
+    log("ハート＆ダガーコール！あなたの勝ち！");
+    vibrate("call");
+    playSound("finalWin");
+    vibrate("win");
+  } else {
+    gameOver = true;
+    callAvailable = false;
+    document.getElementById("resultText").innerText = "誤コール！あなたの負け！";
+    showBattleResultLabels("lose");
+    log("誤コール！あなたの負け！");
+    playSound("finalLose");
+    vibrate("lose");
+  }
+  updateUI();
+}
+
+function enemyCall(){
+  if(gameOver) return;
+  gameOver = true;
+  callAvailable = false;
+  document.getElementById("resultText").innerText = "相手がハート＆ダガーコール！あなたの負け！";
+  showBattleResultLabels("lose");
+  log("相手がハート＆ダガーコール！あなたの負け！");
+  vibrate("call");
+  playSound("finalLose");
+    vibrate("lose");
+  updateUI();
+}
+
+function isDrawLockedExactly(){
+  const outcomes = getFutureOutcomes();
+  return outcomes.size === 1 && outcomes.has("draw");
+}
+
+function searchFutureOutcomes(pHand, eHand, scoreDiff, memo){
+  const key = [
+    pHand.短剣, pHand.盾, pHand.心臓, pHand.ソッコーダガー || 0, pHand.ソッコーハート || 0,
+    eHand.短剣, eHand.盾, eHand.心臓, eHand.ソッコーダガー || 0, eHand.ソッコーハート || 0,
+    scoreDiff
+  ].join(",");
+
+  if(memo.has(key)){
+    return new Set(memo.get(key));
+  }
+
+  if(totalCards(pHand) === 0){
+    let result;
+    if(scoreDiff > 0) result = "player";
+    else if(scoreDiff < 0) result = "enemy";
+    else result = "draw";
+
+    const finalSet = new Set([result]);
+    memo.set(key, [...finalSet]);
+    return finalSet;
+  }
+
+  const results = new Set();
+  const pCards = availableCards(pHand);
+  const eCards = availableCards(eHand);
+
+  for(const pCard of pCards){
+    for(const eCard of eCards){
+      const nextP = {...pHand};
+      const nextE = {...eHand};
+      nextP[pCard]--;
+      nextE[eCard]--;
+
+      let nextDiff = scoreDiff;
+      if(pCard === "ソッコーダガー" && (eCard === "心臓" || eCard === "ソッコーハート")){
+        results.add("player");
+        continue;
+      }
+      if(eCard === "ソッコーダガー" && (pCard === "心臓" || pCard === "ソッコーハート")){
+        results.add("enemy");
+        continue;
+      }
+      if(pCard === "ソッコーハート" && (eCard === "短剣" || eCard === "ソッコーダガー")){
+        results.add("enemy");
+        continue;
+      }
+      if(eCard === "ソッコーハート" && (pCard === "短剣" || pCard === "ソッコーダガー")){
+        results.add("player");
+        continue;
+      }
+
+      if(pCard === "短剣" && eCard === "心臓") nextDiff++;
+      else if(eCard === "短剣" && pCard === "心臓") nextDiff--;
+
+      const childResults = searchFutureOutcomes(nextP, nextE, nextDiff, memo);
+      for(const r of childResults) results.add(r);
+
+      if(results.size > 1){
+        memo.set(key, [...results]);
+        return results;
+      }
+    }
+  }
+
+  memo.set(key, [...results]);
+  return results;
+}
+
+function availableCards(hand){
+  const cards = [];
+  if(hand.短剣 > 0) cards.push("短剣");
+  if(hand.盾 > 0) cards.push("盾");
+  if(hand.心臓 > 0) cards.push("心臓");
+  if((hand.ソッコーダガー || 0) > 0) cards.push("ソッコーダガー");
+  if((hand.ソッコーハート || 0) > 0) cards.push("ソッコーハート");
+  return cards;
+}
+
+function endGame(){
+  gameOver = true;
+  callAvailable = false;
+  clearEnemyCallTimer();
+
+  let msg = "";
+  if(pScore > eScore){
+    msg = "ゲーム終了！あなたの勝ち！";
+    showBattleResultLabels("win");
+    playSound("finalWin");
+    vibrate("win");
+  } else if(pScore < eScore){
+    msg = "ゲーム終了！相手の勝ち！";
+    showBattleResultLabels("lose");
+    playSound("finalLose");
+    vibrate("lose");
+  } else {
+    // 引き分け終了は発生させない。最終的に同点になった場合も相手のコール扱い。
+    enemyCall();
+    return;
+  }
+  document.getElementById("resultText").innerText = msg;
+  log("=== " + msg + " ===");
+  updateUI();
+}
+
+function resetCardClasses(){
+  clearBattleResultLabels();
+  document.getElementById("playerImg").classList.remove("card-enter-player", "card-enter-enemy", "card-win", "card-lose");
+  document.getElementById("enemyImg").classList.remove("card-enter-player", "card-enter-enemy", "card-win", "card-lose");
+}
+
+function clearEnemyCallTimer(){
+  if(enemyCallTimer){
+    clearTimeout(enemyCallTimer);
+    enemyCallTimer = null;
+  }
+}
+
+function totalCards(obj){ return obj.短剣 + obj.盾 + obj.心臓 + (obj.ソッコーダガー || 0) + (obj.ソッコーハート || 0); }
+
+function log(
+text){
+  const logDiv = document.getElementById("log");
+  logDiv.innerHTML += text + "<br>";
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function getAudioContext(){
+  if(!audioCtx || audioCtx.state === "closed"){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function beep(freq, duration, type = "sine", volume = 0.18){
+  const seVolumeBoost = 2.6;
+  volume = Math.min(volume * seVolumeBoost, 0.42);
+
+  try{
+    const ctx = getAudioContext();
+
+    if(ctx.state === "suspended"){
+      ctx.resume();
+    }
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch(e){
+    // 復帰不能なAudioContextを破棄。次のタップで作り直す。
+    audioCtx = null;
+  }
+}
+
+function vibrate(type){
+  if(!navigator.vibrate) return;
+
+  if(type === "card"){
+    navigator.vibrate(20);
+  } else if(type === "point"){
+    navigator.vibrate([35, 35, 35]);
+  } else if(type === "win"){
+    navigator.vibrate([60, 40, 100]);
+  } else if(type === "lose"){
+    navigator.vibrate([120, 50, 120]);
+  } else if(type === "call"){
+    navigator.vibrate([50, 30, 50, 30, 120]);
+  } else if(type === "sokkooWin"){
+    navigator.vibrate([45, 25, 45, 25, 160, 35, 220]);
+  } else if(type === "sokkooLose"){
+    navigator.vibrate([180, 45, 180, 45, 260]);
+  } else if(type === "block"){
+    navigator.vibrate(25);
+  }
+}
+
+function playSound(type){
+  if(type === "button"){
+    beep(880, 0.035, "triangle", 0.075);
+    return;
+  }
+
+  if(type === "start"){
+    beep(660, 0.045, "triangle", 0.09);
+    setTimeout(() => beep(990, 0.055, "triangle", 0.09), 55);
+  }
+  else if(type === "card"){
+    beep(320, .05, "square", .04);
+  } else if(type === "win"){
+    beep(700, .08, "triangle", .08);
+    setTimeout(() => beep(900, .10, "triangle", .08), 80);
+  } else if(type === "lose"){
+    beep(220, .16, "sawtooth", .06);
+  } else if(type === "block"){
+    beep(180, .08, "square", .05);
+  } else if(type === "finalWin"){
+    beep(523, .09, "triangle", .08);
+    setTimeout(() => beep(659, .09, "triangle", .08), 100);
+    setTimeout(() => beep(784, .18, "triangle", .08), 200);
+  } else if(type === "finalLose"){
+    beep(300, .12, "sawtooth", .06);
+    setTimeout(() => beep(200, .20, "sawtooth", .06), 130);
+  } else if(type === "draw"){
+    beep(400, .10, "sine", .06);
+    setTimeout(() => beep(400, .10, "sine", .06), 130);
+  }
+  else if(type === "sokkooWin"){
+    beep(880, .07, "triangle", .10);
+    setTimeout(() => beep(1175, .08, "triangle", .10), 85);
+    setTimeout(() => beep(1568, .16, "triangle", .11), 180);
+    setTimeout(() => beep(2093, .22, "triangle", .09), 350);
+  }
+  else if(type === "sokkooLose"){
+    beep(180, .16, "sawtooth", .08);
+    setTimeout(() => beep(130, .22, "sawtooth", .08), 150);
+    setTimeout(() => beep(90, .34, "sawtooth", .075), 370);
+  }
+}
+
+
+function resumeAudioIfNeeded(){
+  if(!audioUnlocked) return;
+  try{
+    const ctx = getAudioContext();
+    if(ctx.state === "suspended"){
+      ctx.resume();
+    }
+  } catch(e){
+    audioCtx = null;
+  }
+}
+
+// iPhone/Safari対策：ページ復帰後の最初の操作で音を復帰
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden){
+    resumeAudioIfNeeded();
+  }
+});
+
+window.addEventListener("pageshow", () => {
+  resumeAudioIfNeeded();
+});
+
+window.addEventListener("focus", () => {
+  resumeAudioIfNeeded();
+});
+
+
+
+function openRules(){
+  document.getElementById("rulesModal").classList.remove("hidden");
+}
+
+function closeRules(){
+  document.getElementById("rulesModal").classList.add("hidden");
+}
+
+
+
+
+
+
+
+
+
+
+let bgmEnabled = false;
+
+function getBgmAudio(){
+  const audio = document.getElementById("bgm");
+  if(audio){
+    audio.volume = 0.18;
+    audio.loop = true;
+  }
+  return audio;
+}
+
+function updateBgmButtons(){
+  const btn = document.getElementById("bgmToggleBtn");
+  if(!btn) return;
+  btn.textContent = bgmEnabled ? "BGM ON" : "BGM OFF";
+  btn.classList.toggle("bgm-on", bgmEnabled);
+  btn.setAttribute("aria-pressed", bgmEnabled ? "true" : "false");
+}
+
+function ensureBattleBgm(forceUnlock){
+  if(forceUnlock) unlockAudio();
+  if(bgmEnabled) startBgm();
+}
+
+function startBgm(){
+  try{
+    const audio = getBgmAudio();
+    if(!audio) return;
+    const p = audio.play();
+    if(p && p.catch){
+      p.catch(()=>{
+        bgmEnabled = false;
+        updateBgmButtons();
+      });
+    }
+  }catch(e){
+    bgmEnabled = false;
+    updateBgmButtons();
+  }
+}
+
+function stopBgm(){
+  const audio = getBgmAudio();
+  if(audio){
+    audio.pause();
+  }
+}
+
+function toggleBgm(){
+  unlockAudio();
+  bgmEnabled = !bgmEnabled;
+  if(bgmEnabled){
+    startBgm();
+  }else{
+    stopBgm();
+  }
+  updateBgmButtons();
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", updateBgmButtons);
+}else{
+  updateBgmButtons();
+}
+
+</script>
+<div id="sokkooOverlay" class="sokkoo-overlay"></div>
+
+
+<audio id="bgm" src="mailbox-marimba.mp3" preload="none" loop></audio>
+
+</body>
+</html>
